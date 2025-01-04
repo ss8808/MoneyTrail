@@ -10,8 +10,8 @@ namespace MoneyTrail.Services
 
         public TransactionService()
         {
-            // Optionally, add some mock data for testing
-            if (!_transactions.Any())
+            // some mock data for testing
+            /*if (!_transactions.Any())
             {
                 _transactions.Add(new Transaction
                 {
@@ -31,7 +31,7 @@ namespace MoneyTrail.Services
                     Date = DateTime.Now.AddDays(-5),
                     Tags = new List<string> { "Expense" }
                 });
-            }
+            }*/
         }
 
         // Retrieve all transactions asynchronously

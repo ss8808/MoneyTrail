@@ -1,7 +1,112 @@
 ﻿@page "/dashboard"
+@using MoneyTrail.Models
+@using MoneyTrail.Services
+@using MudBlazor
 
-<h1>Hello Shristi !!
-    Welcome to your personal expense tracker
-</h1>
+<h3>Dashboard</h3>
 
+<!-- Financial Statistics -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Total Inflows</div>
+            <div class="card-body">
+                <h5 class="card-title">@TotalInflows.ToString("C")</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-header">Total Outflows</div>
+            <div class="card-body">
+                <h5 class="card-title">@TotalOutflows.ToString("C")</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Total Debts</div>
+            <div class="card-body">
+                <h5 class="card-title">@TotalDebts.ToString("C")</h5>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Pending Debts with Date Filter -->
+<h4>Pending Debts</h4>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <input class="form-control" type="date" @bind="StartDate" placeholder="Start Date" />
+    </div>
+    <div class="col-md-6">
+        <input class="form-control" type="date" @bind="EndDate" placeholder="End Date" />
+    </div>
+</div>
+
+@if (PendingDebts.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Amount</th>
+                <th>Due Date</th>
+                <th>Paid Amount</th>
+                <th>Is Cleared</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var debt in PendingDebts)
+            {
+                <tr>
+                    <td>@debt.Title</td>
+                    <td>@debt.Amount.ToString("C")</td>
+                    <td>@debt.DueDate.ToShortDateString()</td>
+                    <td>@debt.Amount.ToString("C")</td>
+                    <td>@(debt.IsCleared ? "Yes" : "No")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No pending debts found.</p>
+}
+
+<!-- Top 5 Highest Transactions -->
+<h4>Top 5 Highest Transactions</h4>
+@if (TopTransactions.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var transaction in TopTransactions)
+            {
+                <tr>
+                    <td>@transaction.Title</td>
+                    <td>@transaction.Type</td>
+                    <td>@transaction.Amount.ToString("C")</td>
+                    <td>@transaction.Date.ToShortDateString()</td>
+                    <td>@transaction.Note</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No transactions available.</p>
+}
+<!-- Graph Representation of Transactions (e.g., Total Inflows, Outflows) -->
+<h4>Transaction Graph</h4>
+<MudChart TItem="KeyValuePair<string, decimal>" ChartType="ChartType.Bar" Data="@ChartData" />

@@ -23,6 +23,7 @@ namespace MoneyTrail.Views.Pages
         private DateTime? StartDate;
         private DateTime? EndDate;
         private string? SelectedTransactionType;
+        private string? Message {  get; set; }
 
         private bool IsAddFormVisible = false;
         private bool IsEditFormVisible = false;
@@ -65,14 +66,25 @@ namespace MoneyTrail.Views.Pages
 
         private async Task OnAddTransaction()
         {
+            Message = null;
             // Parse the comma-separated tags
             if (!string.IsNullOrEmpty(TagsInput))
             {
                 NewTransaction.Tags = TagsInput.Split(',').Select(tag => tag.Trim()).ToList();
             }
 
-            // Update balance based on transaction type
-            if (NewTransaction.Type == TransactionType.Credit)
+           
+
+            // Handle Debt-specific fields
+            
+
+            // If it's a cleared debt, remove the debt amount from the balance (as it's paid)
+            if (NewTransaction.Type == TransactionType.Debt)
+            {
+                Balance = NewTransaction.Amount; // If it's cleared, treat it as cash inflow
+            }
+            
+            else if (NewTransaction.Type == TransactionType.Credit)
             {
                 Balance += NewTransaction.Amount;
             }
@@ -85,6 +97,7 @@ namespace MoneyTrail.Views.Pages
                 else
                 {
                     // Show balance insufficient message
+                    Message = "Insufficient balance.";
                     return;
                 }
             }
@@ -103,8 +116,28 @@ namespace MoneyTrail.Views.Pages
                 EditTransactionModel!.Tags = TagsInput.Split(',').Select(tag => tag.Trim()).ToList();
             }
 
-            // Update balance based on transaction type
-            if (EditTransactionModel.Type == TransactionType.Credit)
+            // Handle Debt-specific fields
+            
+
+            // If it's a cleared debt, adjust balance
+            if (EditTransactionModel.Type == TransactionType.Debt && EditTransactionModel.IsCleared)
+            {
+                if (Balance >= EditTransactionModel.Amount)
+                {
+                    Balance -= EditTransactionModel.Amount;
+                }
+                else
+                {
+                    // Show balance insufficient message
+                    Message = "Insufficient balance.";
+                    return;
+                } // If it's cleared, treat it as cash inflow
+            }
+            else if(EditTransactionModel.Type == TransactionType.Debt && !(EditTransactionModel.IsCleared))
+            {
+                Balance = EditTransactionModel.Amount;
+            }
+            else if (EditTransactionModel.Type == TransactionType.Credit)
             {
                 Balance += EditTransactionModel.Amount;
             }
@@ -117,6 +150,7 @@ namespace MoneyTrail.Views.Pages
                 else
                 {
                     // Show balance insufficient message
+                    Message = "Insufficient balance.";
                     return;
                 }
             }

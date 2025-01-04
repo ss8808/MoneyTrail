@@ -10,5 +10,11 @@ namespace MoneyTrail.Models
         public decimal Amount { get; set; }
         public DateTime Date { get; set; }
         public List<string> Tags { get; set; }
+        public string? Note {  get; set; }
+
+        //debt specific fields
+        public bool IsCleared { get; set; }
+        public string Source { get; set; }
+        public DateTime DueDate { get; set; }
     }
 }

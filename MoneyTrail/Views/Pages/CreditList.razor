@@ -1,4 +1,71 @@
 ﻿@page "/credit-list"
-<h3>CreditList</h3>
+@using MoneyTrail.Enums
+<h3>Credit Transactions</h3>
+
+<!-- Filter and Search Section -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <input class="form-control" placeholder="Search by Title" @bind="SearchText" />
+    </div>
+    <div class="col-md-3">
+        <input class="form-control" type="date" @bind="StartDate" placeholder="Start Date" />
+    </div>
+    <div class="col-md-3">
+        <input class="form-control" type="date" @bind="EndDate" placeholder="End Date" />
+    </div>
+</div>
+
+<div>
+    <label for="sortOrder">Sort by:</label>
+    <select id="sortOrder" @bind="SortOrder" @bind:event="onchange" class="form-control">
+        <option value="Ascending">Date Ascending</option>
+        <option value="Descending">Date Descending</option>
+    </select>
+</div>
+
+
+@if (FilteredTransactions.Any())
+{
+    <p><strong>Showing Filtered Transactions:</strong></p>
+    @if (CreditTransactions.Any())
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Tags</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var transaction in CreditTransactions)
+                {
+                    <tr>
+                        <td>@transaction.Title</td>
+                        <td>@transaction.Amount</td>
+                        <td>@transaction.Date.ToShortDateString()</td>
+                        <td>@string.Join(", ", transaction.Tags)</td>
+                        <td>@transaction.Note</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No credit transactions found.</p>
+    }
+    
+}
+
+else
+{
+    <p>No transactions found.</p>
+}
+
+
+
 
 

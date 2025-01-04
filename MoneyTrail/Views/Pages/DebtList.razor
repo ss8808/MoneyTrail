@@ -1,4 +1,37 @@
 ﻿@page "/debt-list"
-<h3>DebtList</h3>
+<h3>Debt Transactions</h3>
+
+@if (DebtTransactions.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Tags</th>
+                <th>Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var transaction in DebtTransactions)
+            {
+                <tr>
+                    <td>@transaction.Title</td>
+                    <td>@transaction.Amount</td>
+                    <td>@transaction.Date.ToShortDateString()</td>
+                    <td>@string.Join(", ", transaction.Tags)</td>
+                    <td>@transaction.Note</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No debt transactions found.</p>
+}
+
+
 
 
