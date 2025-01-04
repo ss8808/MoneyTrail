@@ -7,3 +7,10 @@
 @using Microsoft.JSInterop
 @using MoneyTrail
 @using MoneyTrail.Components
+@using MoneyTrail.Services
+@using MudBlazor
+
+@inject AuthService AuthService;
+@inject TransactionService TransactionService;
+@inject NavigationManager Nav;
+@inject ISnackbar Snackbar;
