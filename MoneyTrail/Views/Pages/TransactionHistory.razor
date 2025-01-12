@@ -3,7 +3,9 @@
 @using MudBlazor
 @using MoneyTrail.Models
 @using MoneyTrail.Services
-<h3>Transactions</h3>
+@using System.ComponentModel.DataAnnotations
+
+<h3 class="text-center">Transactions</h3>
 
 <!-- Filter and Search Section -->
 <div class="row mb-4">
@@ -26,29 +28,44 @@
     </div>
 </div>
 
+<!-- Filter Button -->
+<div class="row">
+    <div class="offset-11">
+        <button class="btn btn-sm btn-outline-primary" @onclick="FilterTransactions">Filter</button>
+    </div>
+</div>
+
 <!-- Add Transaction Button -->
-<button class="btn btn-primary" @onclick="OpenAddForm">Add Transaction</button>
 
 <!-- Display Balance -->
 <h4>Current Balance: @Balance</h4>
+<br />
 
 <!-- Transaction List -->
-<h4>Transaction List</h4>
-@if (FilteredTransactions.Any())
-{
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Tags</th>
-                    <th>Notes</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
+<h4 class="text-center">Transaction List</h4>
+
+<div class="row mb-1">
+    <div class="offset-10">
+        <button class="btn btn-sm btn-outline-primary" @onclick="OpenAddForm">Add Transaction</button>
+    </div>
+</div>
+
+
+<table class="table table-striped table-hover table-sm">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Tags</th>
+            <th>Notes</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @if (FilteredTransactions.Any())
+        {
             @foreach (var transaction in FilteredTransactions)
             {
                     <tr>
@@ -59,137 +76,202 @@
                         <td>@string.Join(", ", transaction.Tags)</td>
                         <td>@transaction.Note</td>
                         <td>
-                            <button class="btn btn-primary" @onclick="() => EditTransaction(transaction)">Edit</button>
-                            <button class="btn btn-danger" @onclick="() => DeleteTransaction(transaction.Id)">Delete</button>
+                        <button class="btn btn-sm btn-outline-primary" @onclick="() => EditTransaction(transaction)">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteTransaction(transaction.Id)">Delete</button>
                         </td>
                     </tr>
             }
-            </tbody>
-        </table>
-}
-else
-{
-        <p>No transactions found.</p>
-}
-
-<!-- Add Transaction Form -->
-@if (IsAddFormVisible)
-{
-        <h4>Add Transaction</h4>
-        <EditForm Model="NewTransaction" OnValidSubmit="OnAddTransaction">
-            <div class="form-group">
-                <label for="title">Title:</label>
-                <input id="title" class="form-control" @bind="NewTransaction.Title" required />
-            </div>
-            <div class="form-group">
-                <label for="type">Type:</label>
-                <select id="type" class="form-control" @bind="NewTransaction.Type" required>
-                    <option value="@(TransactionType.Credit)">Credit</option>
-                    <option value="@(TransactionType.Debit)">Debit</option>
-                    <option value="@(TransactionType.Debt)">Debt</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="amount">Amount:</label>
-                <input id="amount" type="number" class="form-control" @bind="NewTransaction.Amount" required />
-            </div>
-            <div class="form-group">
-                <label for="date">Date:</label>
-                <input id="date" type="date" class="form-control" @bind="NewTransaction.Date" required />
-            </div>
-            <div class="form-group">
-                <label for="tags">Tags (comma-separated):</label>
-                <input id="tags" class="form-control" @bind="TagsInput" />
-            </div>
-            <div class="form-group">
-                <label for="note">Note (optional):</label>
-                <textarea id="note" class="form-control" @bind="NewTransaction.Note"></textarea>
-            </div>
-
-            <!-- Conditional Debt Fields -->
-        @if (NewTransaction.Type == TransactionType.Debt)
-        {
-                    <div class="form-group">
-                        <label for="source">Source:</label>
-                        <input id="source" class="form-control" @bind="NewTransaction.Source" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="dueDate">Due Date:</label>
-                        <input id="dueDate" type="date" class="form-control" @bind="NewTransaction.DueDate" required />
-                    </div>
-                    
         }
-
-        @if (!string.IsNullOrEmpty(Message))
+        else if (!FilteredTransactions.Any() && Transactions.Any())
         {
-                    <div class="alert alert-danger">
-                    @Message
-                    </div>
+            @foreach (var transaction in Transactions)
+            {
+                <tr>
+                    <td>@(transaction.Title ?? "N/A")</td>  <!-- Default to "N/A" if Title is null -->
+                    <td>@(transaction.Type.ToString() ?? "Unknown")</td> <!-- Handle null Type -->
+                    <td>@(transaction.Amount.ToString("C") ?? "0.00")</td> <!-- Handle null Amount -->
+                    <td>@(transaction.Date.ToShortDateString() ?? "N/A")</td> <!-- Handle null Date -->
+                    <td>@(transaction.Tags != null ? string.Join(", ", transaction.Tags) : "N/A")</td> <!-- Handle null Tags -->
+                    <td>@(transaction.Note ?? "N/A")</td> <!-- Handle null Note -->
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" @onclick="() => EditTransaction(transaction)">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteTransaction(transaction.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
         }
+        else
+        {
+            <p>No transactions found.</p>
 
-            <button type="submit" class="btn btn-primary">Submit</button>
-            <button type="button" class="btn btn-secondary" @onclick="CloseAddForm">Cancel</button>
-        </EditForm>
-}
+        }
+    </tbody>
+</table>
+
+
+<!-- Add Transaction Modal -->
+<div class="modal @(IsAddFormVisible ? "show d-block" : "fade")" tabindex="-1" role="dialog" aria-labelledby="addTransactionModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTransactionModal">Add Transaction</h5>
+                <button type="button" class="btn-close" @onclick="CloseAddForm" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="NewTransaction" OnValidSubmit="OnAddTransaction">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <!-- Title Field -->
+                    <div class="form-group">
+                        <label for="title">Title:</label>
+                        <input id="title" class="form-control" @bind="NewTransaction.Title" required />
+                        <ValidationMessage For="@(() => NewTransaction.Title)" />
+                    </div>
+
+                    <!-- Type Field -->
+                    <div class="form-group">
+                        <label for="type">Type:</label>
+                        <select id="type" class="form-control" @bind="NewTransaction.Type">
+                            @foreach (var type in Enum.GetValues<TransactionType>())
+                            {
+                                <option value="@type">@type</option>
+                            }
+                        </select>
+                        <ValidationMessage For="@(() => NewTransaction.Type)" />
+                    </div>
+
+                    <!-- Amount Field -->
+                    <div class="form-group">
+                        <label for="amount">Amount:</label>
+                        <input id="amount" type="number" class="form-control" @bind="NewTransaction.Amount" required />
+                        <ValidationMessage For="@(() => NewTransaction.Amount)" />
+                    </div>
+
+                    <!-- Date Field -->
+                    <div class="form-group">
+                        <label for="date">Date:</label>
+                        <input id="date" type="date" class="form-control" @bind="NewTransaction.Date" required />
+                        <ValidationMessage For="@(() => NewTransaction.Date)" />
+                    </div>
+
+                    <!-- Tags Field -->
+                    <div class="form-group">
+                        <label for="tags">Tags (comma-separated):</label>
+                        <input id="tags" class="form-control" @bind="TagsInput" />
+                    </div>
+
+                    <!-- Note Field -->
+                    <div class="form-group">
+                        <label for="note">Note (optional):</label>
+                        <textarea id="note" class="form-control" @bind="NewTransaction.Note"></textarea>
+                    </div>
+
+                    <!-- Conditional Debt Fields -->
+                    @if (NewTransaction.Type == TransactionType.Debt)
+                    {
+                        <div class="form-group">
+                            <label for="source">Source:</label>
+                            <input id="source" class="form-control" @bind="NewTransaction.Source" />
+                            <ValidationMessage For="@(() => NewTransaction.Source)" />
+                        </div>
+                        <div class="form-group">
+                            <label for="dueDate">Due Date:</label>
+                            <input id="dueDate" type="date" class="form-control" @bind="NewTransaction.DueDate" />
+                            <ValidationMessage For="@(() => NewTransaction.DueDate)" />
+                        </div>
+                    }
+
+                    <!-- Error Message -->
+                    @if (!string.IsNullOrEmpty(Message))
+                    {
+                        <div class="alert alert-danger">
+                            @Message
+                        </div>
+                    }
+
+                    <!-- Buttons -->
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Submit</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CloseAddForm">Cancel</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Edit Transaction Form -->
 @if (IsEditFormVisible)
 {
-        <h4>Edit Transaction</h4>
-        <EditForm Model="EditTransactionModel" OnValidSubmit="OnEditTransaction">
-            <div class="form-group">
-                <label for="title">Title:</label>
-                <input id="title" class="form-control" @bind="EditTransactionModel.Title" required />
-            </div>
-            <div class="form-group">
-                <label for="type">Type:</label>
-                <select id="type" class="form-control" @bind="EditTransactionModel.Type" required>
-                    <option value="@(TransactionType.Credit)">Credit</option>
-                    <option value="@(TransactionType.Debit)">Debit</option>
-                    <option value="@(TransactionType.Debt)">Debt</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="amount">Amount:</label>
-                <input id="amount" type="number" class="form-control" @bind="EditTransactionModel.Amount" required />
-            </div>
-            <div class="form-group">
-                <label for="date">Date:</label>
-                <input id="date" type="date" class="form-control" @bind="EditTransactionModel.Date" required />
-            </div>
-            <div class="form-group">
-                <label for="tags">Tags (comma-separated):</label>
-                <input id="tags" class="form-control" @bind="TagsInput" />
-            </div>
-            <div class="form-group">
-                <label for="note">Note (optional):</label>
-                <textarea id="note" class="form-control" @bind="EditTransactionModel.Note"></textarea>
-            </div>
+    <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog" aria-labelledby="editTransactionModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editTransactionModalLabel">Edit Transaction</h5>
+                    <button type="button" class="close" @onclick="CloseEditForm" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="EditTransactionModel" OnValidSubmit="OnEditTransaction">
+                        <div class="form-group">
+                            <label for="title">Title:</label>
+                            <input id="title" class="form-control" @bind="EditTransactionModel.Title" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="type">Type:</label>
+                            <select id="type" class="form-control" @bind="EditTransactionModel.Type" required>
+                                <option value="@(TransactionType.Credit)">Credit</option>
+                                <option value="@(TransactionType.Debit)">Debit</option>
+                                <option value="@(TransactionType.Debt)">Debt</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="amount">Amount:</label>
+                            <input id="amount" type="number" class="form-control" @bind="EditTransactionModel.Amount" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Date:</label>
+                            <input id="date" type="date" class="form-control" @bind="EditTransactionModel.Date" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="tags">Tags (comma-separated):</label>
+                            <input id="tags" class="form-control" @bind="TagsInput" />
+                        </div>
+                        <div class="form-group">
+                            <label for="note">Note (optional):</label>
+                            <textarea id="note" class="form-control" @bind="EditTransactionModel.Note"></textarea>
+                        </div>
 
-            <!-- Conditional Debt Fields -->
-        @if (EditTransactionModel.Type == TransactionType.Debt)
-        {
-                    <div class="form-group">
-                        <label for="source">Source:</label>
-                        <input id="source" class="form-control" @bind="EditTransactionModel.Source" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="dueDate">Due Date:</label>
-                        <input id="dueDate" type="date" class="form-control" @bind="EditTransactionModel.DueDate" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="isCleared">Is Cleared:</label>
-                        <input id="isCleared" type="checkbox"  @bind="EditTransactionModel.IsCleared" />
-                    </div>
-        }
-        @if (!string.IsNullOrEmpty(Message))
-        {
-                            <div class="alert alert-danger">
-                @Message
+                        <!-- Conditional Debt Fields -->
+                        @if (EditTransactionModel.Type == TransactionType.Debt)
+                        {
+                            <div class="form-group">
+                                <label for="source">Source:</label>
+                                <input id="source" class="form-control" @bind="EditTransactionModel.Source" required />
                             </div>
-        }
+                            <div class="form-group">
+                                <label for="dueDate">Due Date:</label>
+                                <input id="dueDate" type="date" class="form-control" @bind="EditTransactionModel.DueDate" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="isCleared">Is Cleared:</label>
+                                <input id="isCleared" type="checkbox" @bind="EditTransactionModel.IsCleared" />
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Message))
+                        {
+                            <div class="alert alert-danger">
+                                @Message
+                            </div>
+                        }
 
-            <button type="submit" class="btn btn-primary">Submit</button>
-            <button type="button" class="btn btn-secondary" @onclick="CloseEditForm">Cancel</button>
-        </EditForm>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Submit</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CloseEditForm">Cancel</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
 }

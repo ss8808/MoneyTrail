@@ -1,37 +1,62 @@
 ﻿@page "/debt-list"
+@using MoneyTrail.Enums
+@using MoneyTrail.Models
+
 <h3>Debt Transactions</h3>
 
-@if (DebtTransactions.Any())
+<div class="row mb-4">
+    <div class="col-md-3">
+        <input class="form-control" placeholder="Search by Title" @bind="SearchText" />
+    </div>
+    <div class="col-md-3">
+        <input class="form-control" type="date" @bind="StartDate" placeholder="Start Date" />
+    </div>
+    <div class="col-md-3">
+        <input class="form-control" type="date" @bind="EndDate" placeholder="End Date" />
+    </div>
+</div>
+
+<div>
+    <label for="sortOrder">Sort by:</label>
+    <select id="sortOrder" @bind="SortOrder" @bind:event="onchange" class="form-control">
+        <option value="Ascending">Date Ascending</option>
+        <option value="Descending">Date Descending</option>
+    </select>
+</div>
+
+@if (FilteredTransactions.Any())
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th>Tags</th>
-                <th>Note</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var transaction in DebtTransactions)
-            {
+    @if (DebtTransactions.Any())
+    {
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>@transaction.Title</td>
-                    <td>@transaction.Amount</td>
-                    <td>@transaction.Date.ToShortDateString()</td>
-                    <td>@string.Join(", ", transaction.Tags)</td>
-                    <td>@transaction.Note</td>
+                    <th>Title</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Tags</th>
+                    <th>Note</th>
+                    <th>Is Cleared</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var transaction in DebtTransactions)
+                {
+                    <tr>
+                        <td>@transaction.Title</td>
+                        <td>@transaction.Amount</td>
+                        <td>@transaction.Date.ToShortDateString()</td>
+                        <td>@string.Join(", ", transaction.Tags)</td>
+                        <td>@transaction.Note</td>
+                        <td>@(transaction.IsCleared ? "Yes" : "No")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    
 }
 else
 {
     <p>No debt transactions found.</p>
 }
-
-
-
-

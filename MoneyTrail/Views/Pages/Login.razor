@@ -2,39 +2,30 @@
 @using MoneyTrail.Services
 
 
-<h3>Login Page</h3>
-<div class="form-login">
-    <form class="text-center" @onsubmit="HandleLogin">
-        <img class="mb-4" src="/appicon.png" alt="" height="72">
-        <h1 class="h3 mb-3 fw-normal">Please Login</h1>
-
-        <div class="form-floating mb-3">
-            <input type="text" class="form-control" @bind="user.Username" placeholder="Username" />
-            <label for="floatingInput">Username</label>
-        </div>
-
-        <!-- Password Input -->
-        <div class="form-floating mb-3">
-            <input type="password" class="form-control" @bind="user.PasswordHash" placeholder="Password" />
-            <label for="floatingPassword">Password</label>
-        </div>
-
-        <div class="form-floating mb-3">
-            <input type="preferredcurrency" class="form-control" @bind="user.PreferredCurrency" placeholder="Preferred Currency" />
-            <label for="floatingInput">Preferred Currency</label>
-        </div>
-
-        
-
-        @if (!string.IsNullOrEmpty(ErrorMessage))
-        {
-            <div class="alert alert-danger">@ErrorMessage</div>
-        }
-        <button class="btn btn-lg btn-primary">
-            Login
-        </button>
-       
-    </form>
-</div>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-5">
+    <MudPaper Elevation="4" Class="p-5">
+        <MudGrid Justify="Justify.Center">
+            <MudItem xs="12" md="8">
+                <MudCard>
+                    <MudCardHeader>
+                        <MudText Typo="Typo.h4" Align="Align.Center">Login</MudText>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudForm @ref="form">
+                            <MudTextField Label="Username" @bind-Value="user.Username" Variant="Variant.Filled" Required="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person" Class="mb-3" />
+                            <MudTextField Label="Password" @bind-Value="user.PasswordHash" Variant="Variant.Filled" InputType="InputType.Password" Required="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" Class="mb-3" />
+                            <MudTextField Label="Preferred Currency" @bind-Value="user.PreferredCurrency" Variant="Variant.Filled" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.MonetizationOn" Class="mb-3" />
+                            @if (!string.IsNullOrEmpty(ErrorMessage))
+                            {
+                                <MudAlert Severity="Severity.Error" Dense="true">@ErrorMessage</MudAlert>
+                            }
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleLogin" Class="mt-4" FullWidth="true">Login</MudButton>
+                        </MudForm>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudContainer>
 
 

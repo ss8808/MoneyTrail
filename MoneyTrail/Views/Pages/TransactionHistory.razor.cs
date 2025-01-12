@@ -7,13 +7,9 @@ namespace MoneyTrail.Views.Pages
     public partial class TransactionHistory
     {
         private List<Transaction> Transactions = new();
-        private List<Transaction> FilteredTransactions => Transactions
-            .Where(t => (string.IsNullOrEmpty(SearchText) || t.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
-                        && (string.IsNullOrEmpty(SelectedTransactionType) || t.Type.ToString() == SelectedTransactionType)
-                        && (string.IsNullOrEmpty(TagsInput) || t.Tags.Any(tag => tag.Contains(TagsInput, StringComparison.OrdinalIgnoreCase)))
-                        && (StartDate == null || t.Date >= StartDate)
-                        && (EndDate == null || t.Date <= EndDate))
-            .ToList();
+        private List<Transaction> FilteredTransactions { get; set; } = new List<Transaction>();
+        private List<Transaction> TransactionsDetails { get; set; } = new List<Transaction>();
+
 
         private decimal Balance { get; set; }
         private Transaction NewTransaction = new();
@@ -30,8 +26,23 @@ namespace MoneyTrail.Views.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            Transactions = (await TransactionService.GetAllAsync()).ToList();
-            UpdateBalance();
+            // Fetch the transactions, and filter out any null transactions
+            Transactions = (await TransactionService.GetAllAsync())
+                            .Where(t => t != null)  // Filter out null transactions
+                            .ToList();
+
+            UpdateBalance(); // Update balance after filtering
+        }
+
+
+        private void FilterTransactions()
+        {
+            FilteredTransactions = Transactions
+                .Where(t => (string.IsNullOrEmpty(SearchText) || t.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+                            && (string.IsNullOrEmpty(SelectedTransactionType) || t.Type.ToString() == SelectedTransactionType)
+                            && (StartDate == null || t.Date >= StartDate)
+                            && (EndDate == null || t.Date <= EndDate))
+                .ToList();
         }
 
         private void OpenAddForm()
@@ -131,7 +142,7 @@ namespace MoneyTrail.Views.Pages
                     // Show balance insufficient message
                     Message = "Insufficient balance.";
                     return;
-                } // If it's cleared, treat it as cash inflow
+                } 
             }
             else if(EditTransactionModel.Type == TransactionType.Debt && !(EditTransactionModel.IsCleared))
             {
@@ -175,8 +186,12 @@ namespace MoneyTrail.Views.Pages
                 .Sum(t => t.Amount)
                 - Transactions
                 .Where(t => t.Type == TransactionType.Debit)
-                .Sum(t => t.Amount);
+                .Sum(t => t.Amount)
+                - Transactions
+                .Where(t => t.Type == TransactionType.Debt && t.IsCleared)  // Subtract cleared debt transactions
+                .Sum(t => t.Amount);  // Subtract the debt amount for cleared transactions
         }
+
     }
 }
 

@@ -11,7 +11,7 @@
         <div class="card text-white bg-success mb-3">
             <div class="card-header">Total Inflows</div>
             <div class="card-body">
-                <h5 class="card-title">@TotalInflows.ToString("C")</h5>
+                <h5 class="card-title">@($"{TotalInflows} {AuthService.GetPreferredCurrency()}")</h5>
             </div>
         </div>
     </div>
@@ -19,7 +19,7 @@
         <div class="card text-white bg-danger mb-3">
             <div class="card-header">Total Outflows</div>
             <div class="card-body">
-                <h5 class="card-title">@TotalOutflows.ToString("C")</h5>
+                <h5 class="card-title">@($"{TotalOutflows} {AuthService.GetPreferredCurrency()}")</h5>
             </div>
         </div>
     </div>
@@ -27,7 +27,23 @@
         <div class="card text-white bg-warning mb-3">
             <div class="card-header">Total Debts</div>
             <div class="card-body">
-                <h5 class="card-title">@TotalDebts.ToString("C")</h5>
+                <h5 class="card-title">@($"{TotalDebts} {AuthService.GetPreferredCurrency()}")</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Pending Debts</div>
+            <div class="card-body">
+                <h5 class="card-title">@($"{PendingDebt} {AuthService.GetPreferredCurrency()}")</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Cleared Debts</div>
+            <div class="card-body">
+                <h5 class="card-title">@($"{ClearedDebts} {AuthService.GetPreferredCurrency()}")</h5>
             </div>
         </div>
     </div>
@@ -44,7 +60,7 @@
     </div>
 </div>
 
-@if (PendingDebts.Any())
+@if (FilteredPendingDebts.Any())
 {
     <table class="table table-striped">
         <thead>
@@ -57,7 +73,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var debt in PendingDebts)
+            @foreach (var debt in FilteredPendingDebts)
             {
                 <tr>
                     <td>@debt.Title</td>
@@ -107,6 +123,10 @@ else
 {
     <p>No transactions available.</p>
 }
-<!-- Graph Representation of Transactions (e.g., Total Inflows, Outflows) -->
+
 <h4>Transaction Graph</h4>
-<MudChart TItem="KeyValuePair<string, decimal>" ChartType="ChartType.Bar" Data="@ChartData" />
+@* <MudChart TItem="KeyValuePair<string, decimal>" ChartType="ChartType.Bar" Data="@ChartData" /> *@
+<div>
+    <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" @bind-SelectedIndex="Index" XAxisLabels="@XAxisLabels" Width="100%" Height="350px"></MudChart>
+</div>
+<MudText Typo="Typo.h6">Selected portion of the chart: @Index</MudText>
