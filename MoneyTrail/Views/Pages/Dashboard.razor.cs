@@ -41,6 +41,23 @@ namespace MoneyTrail.Views.Pages
 
             // Filter and get pending debts
             PendingDebts = transactions.Where(t => t.Type == TransactionType.Debt && !t.IsCleared).ToList();
+
+            Series = new List<ChartSeries>
+            {
+                new ChartSeries
+                {
+                    Name = "Financial Statistics",
+                    Data = new double[]
+                    {
+                        (double)TotalInflows,
+                        (double)TotalOutflows,
+                        (double)TotalDebts,
+                        (double)PendingDebt,
+                        (double)ClearedDebts
+                    }
+                }
+            };
+
         }
 
         private IEnumerable<Transaction> ApplyFilters()
@@ -62,16 +79,8 @@ namespace MoneyTrail.Views.Pages
 
         private int Index = -1; // Default value cannot be 0 -> first selected index is 0.
 
-        public List<ChartSeries> Series = new List<ChartSeries>()
-    {
-        new ChartSeries() { Name = "United States", Data = new double[] { 40, 20, 25, 27, 46, 60, 48, 80, 15 } },
-        new ChartSeries() { Name = "Germany", Data = new double[] { 19, 24, 35, 13, 28, 15, 13, 16, 31 } },
-        new ChartSeries() { Name = "Sweden", Data = new double[] { 8, 6, 11, 13, 4, 16, 10, 16, 18 } },
-    };
-
-        public string[] XAxisLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep" };
-
-
+        public List<ChartSeries> Series = new List<ChartSeries>();
+        public string[] XAxisLabels = { "Total Inflows", "Total Outflows", "Total Debts", "Pending Debts", "Cleared Debts" };
 
     }
 }

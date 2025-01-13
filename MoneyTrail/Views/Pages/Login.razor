@@ -1,31 +1,56 @@
 ﻿@page "/login"
 @using MoneyTrail.Services
 
-
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-5">
-    <MudPaper Elevation="4" Class="p-5">
-        <MudGrid Justify="Justify.Center">
-            <MudItem xs="12" md="8">
-                <MudCard>
-                    <MudCardHeader>
-                        <MudText Typo="Typo.h4" Align="Align.Center">Login</MudText>
-                    </MudCardHeader>
-                    <MudCardContent>
-                        <MudForm @ref="form">
-                            <MudTextField Label="Username" @bind-Value="user.Username" Variant="Variant.Filled" Required="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person" Class="mb-3" />
-                            <MudTextField Label="Password" @bind-Value="user.PasswordHash" Variant="Variant.Filled" InputType="InputType.Password" Required="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock" Class="mb-3" />
-                            <MudTextField Label="Preferred Currency" @bind-Value="user.PreferredCurrency" Variant="Variant.Filled" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.MonetizationOn" Class="mb-3" />
-                            @if (!string.IsNullOrEmpty(ErrorMessage))
-                            {
-                                <MudAlert Severity="Severity.Error" Dense="true">@ErrorMessage</MudAlert>
-                            }
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleLogin" Class="mt-4" FullWidth="true">Login</MudButton>
-                        </MudForm>
-                    </MudCardContent>
-                </MudCard>
-            </MudItem>
-        </MudGrid>
-    </MudPaper>
+    <MudGrid Justify="Justify.Center">
+        <!-- Header Section -->
+        <MudItem xs="12">
+            <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-3">
+                Welcome to MoneyTrail: Your Personal Expense Tracker
+            </MudText>
+        </MudItem>
+
+        <!-- Login Form Section -->
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="4" Class="p-5">
+                <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-2">Log In</MudText>
+                <MudForm @ref="form">
+                    <MudTextField Label="Username" @bind-Value="user.Username"
+                                  Variant="Variant.Filled" Required="true"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Person"
+                                  Class="mb-3" />
+
+                    <MudTextField Label="Password" @bind-Value="user.PasswordHash"
+                                  Variant="Variant.Filled" InputType="InputType.Password"
+                                  Required="true" Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Lock"
+                                  Class="mb-3" />
+
+                    <MudTextField Label="Preferred Currency" @bind-Value="user.PreferredCurrency"
+                                  Variant="Variant.Filled" Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.MonetizationOn"
+                                  Class="mb-3" />
+
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <MudAlert Severity="Severity.Error" Dense="true">@ErrorMessage</MudAlert>
+                    }
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                               OnClick="HandleLogin" Class="mt-4" FullWidth="true">
+                        Login
+                    </MudButton>
+                </MudForm>
+            </MudPaper>
+        </MudItem>
+
+        <!-- Footer Slogan -->
+        
+        <MudItem xs="12">
+            <MudText Typo="Typo.h6" Align="Align.Center" Class="text-muted">
+                "Every penny has a purpose—track it, save it, own it."
+            </MudText>
+        </MudItem>
+    </MudGrid>
 </MudContainer>
-
-
