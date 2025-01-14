@@ -23,6 +23,18 @@ namespace MoneyTrail.Views.Pages
 
         private bool IsAddFormVisible = false;
         private bool IsEditFormVisible = false;
+        
+
+        private List<string> AllTags { get; set; } = new();
+        private string SelectedTag { get; set; } = string.Empty;
+
+        private List<string> PredefinedTags { get; set; } = new()
+        {
+            "Yearly", "Monthly", "Food", "Drinks", "Clothes",
+            "Gadgets", "Miscellaneous", "Fuel", "Rent", "EMI", "Party"
+        };
+
+
 
         protected override async Task OnInitializedAsync()
         {
@@ -31,7 +43,12 @@ namespace MoneyTrail.Views.Pages
                             .Where(t => t != null)  // Filter out null transactions
                             .ToList();
 
-            UpdateBalance(); // Update balance after filtering
+            var transactionTags = Transactions.SelectMany(t => t.Tags ?? new List<string>()).Distinct();
+            AllTags = PredefinedTags.Union(transactionTags).OrderBy(tag => tag).ToList();
+
+            UpdateBalance();
+           
+
         }
 
 
@@ -41,9 +58,12 @@ namespace MoneyTrail.Views.Pages
                 .Where(t => (string.IsNullOrEmpty(SearchText) || t.Title.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
                             && (string.IsNullOrEmpty(SelectedTransactionType) || t.Type.ToString() == SelectedTransactionType)
                             && (StartDate == null || t.Date >= StartDate)
-                            && (EndDate == null || t.Date <= EndDate))
-                .ToList();
+                            && (EndDate == null || t.Date <= EndDate)
+                            && (string.IsNullOrEmpty(SelectedTag) || t.Tags.Contains(SelectedTag))).ToList();
+            
+
         }
+
 
         private void OpenAddForm()
         {
@@ -54,7 +74,29 @@ namespace MoneyTrail.Views.Pages
             StateHasChanged();
         }
 
-        private void EditTransaction(Transaction transaction)
+        private void AddPredefinedTag(string tag)
+        {
+            var tags = TagsInput.Split(',').Select(t => t.Trim()).ToList();
+            if (!tags.Contains(tag))
+            {
+                tags.Add(tag);
+                TagsInput = string.Join(", ", tags);
+            }
+            if (!string.IsNullOrEmpty(TagsInput))
+            {
+                NewTransaction.Tags = TagsInput.Split(',')
+                                                .Select(tag => tag.Trim())
+                                                .Where(tag => !string.IsNullOrEmpty(tag))
+                                                .Distinct()
+                                                .ToList();
+            }
+        }
+
+        
+
+
+
+    private void EditTransaction(Transaction transaction)
         {
             EditTransactionModel = transaction;
             TagsInput = string.Join(",", transaction.Tags);
@@ -191,6 +233,7 @@ namespace MoneyTrail.Views.Pages
                 .Where(t => t.Type == TransactionType.Debt && t.IsCleared)  // Subtract cleared debt transactions
                 .Sum(t => t.Amount);  // Subtract the debt amount for cleared transactions
         }
+        
 
     }
 }

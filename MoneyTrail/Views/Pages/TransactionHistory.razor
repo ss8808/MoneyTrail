@@ -26,6 +26,16 @@
             <option value="@(TransactionType.Debt)">Debt</option>
         </select>
     </div>
+
+    <div class="col-md-3">
+        <select class="form-control" @bind="SelectedTag">
+            <option value="">All Tags</option>
+            @foreach (var tag in PredefinedTags)
+            {
+                <option value="@tag">@tag</option>
+            }
+        </select>
+    </div>
 </div>
 
 <!-- Filter Button -->
@@ -35,11 +45,14 @@
     </div>
 </div>
 
-<!-- Add Transaction Button -->
-
-<!-- Display Balance -->
-<h4>Current Balance: @Balance</h4>
-<br />
+<div class="card shadow-sm border-primary mb-4" style="width: 250px; margin-left: 20px;">
+    <div class="card-body text-center">
+        <h5 class="card-title text-primary">
+            <i class="fas fa-wallet"></i> Current Balance
+        </h5>
+        <h4 class="card-text text-success fw-bold">@Balance</h4>
+    </div>
+</div>
 
 <!-- Transaction List -->
 <h4 class="text-center">Transaction List</h4>
@@ -71,7 +84,7 @@
                     <tr>
                         <td>@transaction.Title</td>
                         <td>@transaction.Type</td>
-                        <td>@transaction.Amount</td>
+                        <td>@($"{transaction.Amount} {AuthService.GetPreferredCurrency()}")</td>
                         <td>@transaction.Date.ToShortDateString()</td>
                         <td>@string.Join(", ", transaction.Tags)</td>
                         <td>@transaction.Note</td>
@@ -89,7 +102,7 @@
                 <tr>
                     <td>@(transaction.Title ?? "N/A")</td>  <!-- Default to "N/A" if Title is null -->
                     <td>@(transaction.Type.ToString() ?? "Unknown")</td> <!-- Handle null Type -->
-                    <td>@(transaction.Amount.ToString("C") ?? "0.00")</td> <!-- Handle null Amount -->
+                    <td>@($"{transaction.Amount} {AuthService.GetPreferredCurrency()}" ?? "0.00")</td> <!-- Handle null Amount -->
                     <td>@(transaction.Date.ToShortDateString() ?? "N/A")</td> <!-- Handle null Date -->
                     <td>@(transaction.Tags != null ? string.Join(", ", transaction.Tags) : "N/A")</td> <!-- Handle null Tags -->
                     <td>@(transaction.Note ?? "N/A")</td> <!-- Handle null Note -->
@@ -155,11 +168,20 @@
                         <ValidationMessage For="@(() => NewTransaction.Date)" />
                     </div>
 
-                    <!-- Tags Field -->
-                    <div class="form-group">
-                        <label for="tags">Tags (comma-separated):</label>
-                        <input id="tags" class="form-control" @bind="TagsInput" />
+                   <div class="form-group">
+                        <label for="tags">Tags:</label>
+                        <div class="mb-2">
+                            @foreach (var tag in PredefinedTags)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-secondary me-1 mb-1" @onclick="() => AddPredefinedTag(tag)">
+                                    @tag
+                                </button>
+                            }
+                        </div>
+                        <input id="tags" class="form-control" @bind="TagsInput" placeholder="Add custom tags" />
+                        <small class="text-muted">Select from predefined tags or add your custom tags.</small>
                     </div>
+
 
                     <!-- Note Field -->
                     <div class="form-group">
@@ -233,10 +255,20 @@
                             <label for="date">Date:</label>
                             <input id="date" type="date" class="form-control" @bind="EditTransactionModel.Date" required />
                         </div>
-                        <div class="form-group">
-                            <label for="tags">Tags (comma-separated):</label>
-                            <input id="tags" class="form-control" @bind="TagsInput" />
+                       <div class="form-group">
+                            <label for="tags">Tags:</label>
+                            <div class="mb-2">
+                                @foreach (var tag in PredefinedTags)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 mb-1" @onclick="() => AddPredefinedTag(tag)">
+                                        @tag
+                                    </button>
+                                }
+                            </div>
+                            <input id="tags" class="form-control" @bind="TagsInput" placeholder="Add custom tags (comma-separated)" />
+                            <small class="text-muted">Select from predefined tags or add your custom tags.</small>
                         </div>
+
                         <div class="form-group">
                             <label for="note">Note (optional):</label>
                             <textarea id="note" class="form-control" @bind="EditTransactionModel.Note"></textarea>
@@ -274,4 +306,6 @@
             </div>
         </div>
     </div>
+        
 }
+

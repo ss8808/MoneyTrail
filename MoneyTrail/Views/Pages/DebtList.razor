@@ -36,6 +36,8 @@
                     <th>Date</th>
                     <th>Tags</th>
                     <th>Note</th>
+                    <th>Source</th>
+                    <th>Due Date</th>
                     <th>Is Cleared</th>
                 </tr>
             </thead>
@@ -44,11 +46,13 @@
                 {
                     <tr>
                         <td>@transaction.Title</td>
-                        <td>@transaction.Amount</td>
+                        <td>@($"{transaction.Amount} {AuthService.GetPreferredCurrency()}")</td>
                         <td>@transaction.Date.ToShortDateString()</td>
                         <td>@string.Join(", ", transaction.Tags)</td>
                         <td>@transaction.Note</td>
-                        <td>@(transaction.IsCleared ? "Yes" : "No")</td>
+                        <td>@transaction.Source</td>
+                        <td>@transaction.DueDate</td>
+                        <td>@(transaction.IsCleared ? "Cleared" : "Pending")</td>
                     </tr>
                 }
             </tbody>

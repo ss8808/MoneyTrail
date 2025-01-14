@@ -2,7 +2,6 @@ using MoneyTrail.Enums;
 using MoneyTrail.Models;
 using MudBlazor;
 
-
 namespace MoneyTrail.Views.Pages
 {
     public partial class Dashboard
@@ -12,18 +11,86 @@ namespace MoneyTrail.Views.Pages
         private decimal TotalDebts { get; set; }
         private decimal PendingDebt { get; set; }
         private decimal ClearedDebts { get; set; }
+        private decimal TotalTransaction { get; set; }
+        private int TotalTransactionsCount { get; set; }
+        private Transaction HighestInflow { get; set; }
+        private Transaction HighestOutflow { get; set; }
+        private Transaction HighestDebt { get; set; }
 
         private List<Transaction> Transactions = new();
+        private List<Transaction> PendingDebts = new();
 
-        private List<Transaction> TopTransactions { get; set; } = new();
-        private List<Transaction> PendingDebts { get; set; } = new();
-        private DateTime? StartDate { get; set; }
-        private DateTime? EndDate { get; set; }
+        private DateTime? _startDateTopTransactions;
+        private DateTime? _endDateTopTransactions;
 
-        // Filtered Pending Debts
-        private IEnumerable<Transaction> FilteredPendingDebts => ApplyFilters();
+        private DateTime? _startDatePendingDebts;
+        private DateTime? _endDatePendingDebts;
 
-        private List<KeyValuePair<string, decimal>> ChartData { get; set; } = new();
+        private DateTime? StartDateTopTransactions
+        {
+            get => _startDateTopTransactions;
+            set
+            {
+                if (_startDateTopTransactions != value)
+                {
+                    _startDateTopTransactions = value;
+                    UpdateTopTransactionsChart();
+                }
+            }
+        }
+
+        private DateTime? EndDateTopTransactions
+        {
+            get => _endDateTopTransactions;
+            set
+            {
+                if (_endDateTopTransactions != value)
+                {
+                    _endDateTopTransactions = value;
+                    UpdateTopTransactionsChart();
+                }
+            }
+        }
+
+        private DateTime? StartDatePendingDebts
+        {
+            get => _startDatePendingDebts;
+            set
+            {
+                if (_startDatePendingDebts != value)
+                {
+                    _startDatePendingDebts = value;
+                    UpdatePendingDebtsChart();
+                }
+            }
+        }
+
+        private DateTime? EndDatePendingDebts
+        {
+            get => _endDatePendingDebts;
+            set
+            {
+                if (_endDatePendingDebts != value)
+                {
+                    _endDatePendingDebts = value;
+                    UpdatePendingDebtsChart();
+                }
+            }
+        }
+
+        private IEnumerable<Transaction> FilteredTopTransactions =>
+            ApplyFilters(Transactions, StartDateTopTransactions, EndDateTopTransactions)
+                .OrderByDescending(t => t.Amount)
+                .Take(5);
+
+        private IEnumerable<Transaction> FilteredPendingDebts =>
+            ApplyFiltersByDueDate(PendingDebts, StartDatePendingDebts, EndDatePendingDebts);
+
+        public List<ChartSeries> TopTransactionsChartSeries { get; set; } = new();
+        public string[] TopTransactionsXAxisLabels { get; set; } = Array.Empty<string>();
+
+        public List<ChartSeries> PendingDebtsChartSeries { get; set; } = new();
+        public string[] PendingDebtsXAxisLabels { get; set; } = Array.Empty<string>();
 
         protected override async Task OnInitializedAsync()
         {
@@ -36,51 +103,88 @@ namespace MoneyTrail.Views.Pages
             PendingDebt = transactions.Where(t => t.Type == TransactionType.Debt && !t.IsCleared).Sum(t => t.Amount);
             ClearedDebts = transactions.Where(t => t.Type == TransactionType.Debt && t.IsCleared).Sum(t => t.Amount);
 
-            // Get the top 5 highest transactions
-            TopTransactions = transactions.OrderByDescending(t => t.Amount).Take(5).ToList();
+            TotalTransactionsCount = transactions.Count;
+            TotalTransaction = TotalInflows + TotalDebts - TotalOutflows;
 
-            // Filter and get pending debts
+            // Calculate Highest Inflow, Outflow, and Debt Transactions
+            HighestInflow = transactions.Where(t => t.Type == TransactionType.Credit)
+                                        .OrderByDescending(t => t.Amount)
+                                        .FirstOrDefault();
+
+            HighestOutflow = transactions.Where(t => t.Type == TransactionType.Debit)
+                                         .OrderByDescending(t => t.Amount)
+                                         .FirstOrDefault();
+
+            HighestDebt = transactions.Where(t => t.Type == TransactionType.Debt)
+                                      .OrderByDescending(t => t.Amount)
+                                      .FirstOrDefault();
+
+            Transactions = transactions;
             PendingDebts = transactions.Where(t => t.Type == TransactionType.Debt && !t.IsCleared).ToList();
 
-            Series = new List<ChartSeries>
-            {
-                new ChartSeries
-                {
-                    Name = "Financial Statistics",
-                    Data = new double[]
-                    {
-                        (double)TotalInflows,
-                        (double)TotalOutflows,
-                        (double)TotalDebts,
-                        (double)PendingDebt,
-                        (double)ClearedDebts
-                    }
-                }
-            };
-
+            UpdateTopTransactionsChart();
+            UpdatePendingDebtsChart();
         }
 
-        private IEnumerable<Transaction> ApplyFilters()
+        private IEnumerable<Transaction> ApplyFilters(IEnumerable<Transaction> transactions, DateTime? startDate, DateTime? endDate)
         {
-            var filtered = PendingDebts.AsEnumerable();
+            var filtered = transactions.AsEnumerable();
 
-            if (StartDate.HasValue)
+            if (startDate.HasValue)
             {
-                filtered = filtered.Where(t => t.DueDate >= StartDate.Value);
+                filtered = filtered.Where(t => t.Date >= startDate.Value);
             }
 
-            if (EndDate.HasValue)
+            if (endDate.HasValue)
             {
-                filtered = filtered.Where(t => t.DueDate <= EndDate.Value);
+                filtered = filtered.Where(t => t.Date <= endDate.Value);
             }
 
             return filtered;
         }
 
-        private int Index = -1; // Default value cannot be 0 -> first selected index is 0.
+        private IEnumerable<Transaction> ApplyFiltersByDueDate(IEnumerable<Transaction> debts, DateTime? startDate, DateTime? endDate)
+        {
+            var filtered = debts.AsEnumerable();
 
-        public List<ChartSeries> Series = new List<ChartSeries>();
-        public string[] XAxisLabels = { "Total Inflows", "Total Outflows", "Total Debts", "Pending Debts", "Cleared Debts" };
+            if (startDate.HasValue)
+            {
+                filtered = filtered.Where(t => t.DueDate >= startDate.Value);
+            }
 
+            if (endDate.HasValue)
+            {
+                filtered = filtered.Where(t => t.DueDate <= endDate.Value);
+            }
+            return filtered;
+        }
+
+            private void UpdateTopTransactionsChart()
+        {
+            var filteredTransactions = FilteredTopTransactions.ToList();
+            TopTransactionsXAxisLabels = filteredTransactions.Select(t => t.Title).ToArray();
+            TopTransactionsChartSeries = new List<ChartSeries>
+            {
+                new ChartSeries
+                {
+                    Name = "Top Transactions",
+                    Data = filteredTransactions.Select(t => (double)t.Amount).ToArray()
+                }
+            };
+        }
+
+        private void UpdatePendingDebtsChart()
+        {
+            var filteredDebts = FilteredPendingDebts.ToList();
+            PendingDebtsXAxisLabels = filteredDebts.Select(t => t.Title).ToArray();
+            PendingDebtsChartSeries = new List<ChartSeries>
+            {
+                new ChartSeries
+                {
+                    Name = "Pending Debts",
+                    Data = filteredDebts.Select(t => (double)t.Amount).ToArray()
+                }
+            };
+        }
     }
 }

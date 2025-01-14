@@ -26,7 +26,6 @@
 
 @if (FilteredTransactions.Any())
 {
-    <p><strong>Showing Filtered Transactions:</strong></p>
     @if (CreditTransactions.Any())
     {
         <table class="table">
@@ -44,7 +43,7 @@
                 {
                     <tr>
                         <td>@transaction.Title</td>
-                        <td>@transaction.Amount</td>
+                        <td>@($"{transaction.Amount} {AuthService.GetPreferredCurrency()}")</td>
                         <td>@transaction.Date.ToShortDateString()</td>
                         <td>@string.Join(", ", transaction.Tags)</td>
                         <td>@transaction.Note</td>

@@ -18,7 +18,6 @@ namespace MoneyTrail
                 });
 
             builder.Services.AddScoped<AuthService>();
-            builder.Services.AddScoped<InMemory>();
             builder.Services.AddScoped<TransactionService>();
 
 

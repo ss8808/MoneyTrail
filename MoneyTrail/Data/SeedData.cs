@@ -6,7 +6,7 @@ namespace MoneyTrail.Data
     {
         public static List<User> SeedUsers() => new()
         {
-            new User {Username = "admin", PasswordHash = "admin123", PreferredCurrency = "NPR"}
+            new User {Username = "admin", PasswordHash = "admin123"}
         };
     }
 }

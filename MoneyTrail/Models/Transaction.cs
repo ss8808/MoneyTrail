@@ -8,7 +8,7 @@ namespace MoneyTrail.Models
         public string Title { get; set; }
         public TransactionType Type { get; set; }
         public decimal Amount { get; set; }
-        public DateTime Date { get; set; }
+        public DateTime Date { get; set; } = DateTime.Today;
         public List<string> Tags { get; set; }
         public string? Note {  get; set; }
 

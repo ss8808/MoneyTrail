@@ -7,7 +7,7 @@ namespace MoneyTrail.Services
     public class AuthService
     {
         private static readonly string FilePath = Path.Combine(FileSystem.AppDataDirectory, "users.json");
-        public string SelectedCurrency { get; private set; } = "USD";
+        public string SelectedCurrency { get; private set; } 
         private List<User> _users;
 
         public AuthService()

@@ -49,6 +49,54 @@
     </div>
 </div>
 
+<!-- Transaction Summary -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm border-primary">
+            <div class="card-body">
+                <h5 class="card-title text-primary"><i class="fas fa-wallet"></i> Transactions Count</h5>
+                <h4 class="card-text text-success fw-bold">@TotalTransactionsCount</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm border-primary">
+            <div class="card-body">
+                <h5 class="card-title text-primary"><i class="fas fa-wallet"></i> Total Transactions</h5>
+                <h4 class="card-text text-success fw-bold">@($"{TotalTransaction} {AuthService.GetPreferredCurrency()}")</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm border-primary">
+            <div class="card-body">
+                <h5 class="card-title text-primary"><i class="fas fa-arrow-up"></i> Highest Inflow</h5>
+                <h4 class="card-text text-success fw-bold">@($"{HighestInflow?.Amount} {AuthService.GetPreferredCurrency()}")</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm border-primary">
+            <div class="card-body">
+                <h5 class="card-title text-primary"><i class="fas fa-arrow-down"></i> Highest Outflow</h5>
+                <h4 class="card-text text-success fw-bold">@($"{HighestOutflow?.Amount} {AuthService.GetPreferredCurrency()}")</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm border-primary">
+            <div class="card-body">
+                <h5 class="card-title text-primary"><i class="fas fa-hand-holding-heart"></i> Highest Debt</h5>
+                <h4 class="card-text text-success fw-bold">@($"{HighestDebt?.Amount} {AuthService.GetPreferredCurrency()}")</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- Tables Row: Top Transactions and Pending Debts -->
 <div class="row">
@@ -59,8 +107,16 @@
                 <h4 class="m-0">Top 5 Highest Transactions</h4>
             </div>
             <div class="card-body p-0">
+                <div class="row p-2">
+                    <div class="col-6">
+                        <input class="form-control" type="date" @bind="StartDateTopTransactions" />
+                    </div>
+                    <div class="col-6">
+                        <input class="form-control" type="date" @bind="EndDateTopTransactions" />
+                    </div>
+                </div>
                 <div style="max-height: 250px; overflow-y: auto;">
-                    @if (TopTransactions.Any())
+                    @if (FilteredTopTransactions.Any())
                     {
                         <table class="table table-striped table-sm m-0">
                             <thead>
@@ -72,7 +128,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var transaction in TopTransactions)
+                                @foreach (var transaction in FilteredTopTransactions)
                                 {
                                     <tr>
                                         <td>@transaction.Title</td>
@@ -100,15 +156,15 @@
                 <h4 class="m-0">Pending Debts</h4>
             </div>
             <div class="card-body p-0">
-                <div style="max-height: 250px; overflow-y: auto;">
-                    <div class="row p-2">
-                        <div class="col-6">
-                            <input class="form-control" type="date" @bind="StartDate" placeholder="Start Date" />
-                        </div>
-                        <div class="col-6">
-                            <input class="form-control" type="date" @bind="EndDate" placeholder="End Date" />
-                        </div>
+                <div class="row p-2">
+                    <div class="col-6">
+                        <input class="form-control" type="date" @bind="StartDatePendingDebts" />
                     </div>
+                    <div class="col-6">
+                        <input class="form-control" type="date" @bind="EndDatePendingDebts" />
+                    </div>
+                </div>
+                <div style="max-height: 250px; overflow-y: auto;">
                     @if (FilteredPendingDebts.Any())
                     {
                         <table class="table table-striped table-sm m-0">
@@ -117,7 +173,6 @@
                                     <th>Title</th>
                                     <th>Amount</th>
                                     <th>Due Date</th>
-                                    <th>Paid</th>
                                     <th>Cleared</th>
                                 </tr>
                             </thead>
@@ -128,7 +183,6 @@
                                         <td>@debt.Title</td>
                                         <td>@($"{debt.Amount} {AuthService.GetPreferredCurrency()}")</td>
                                         <td>@debt.DueDate.ToShortDateString()</td>
-                                        <td>@($"{debt.Amount} {AuthService.GetPreferredCurrency()}")</td>
                                         <td>@(debt.IsCleared ? "Yes" : "No")</td>
                                     </tr>
                                 }
@@ -147,14 +201,26 @@
 
 <!-- Graph Row -->
 <div class="row mt-4">
-    <div class="col-md-12">
+    <!-- Top Highest Transactions Graph -->
+    <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h4 class="m-0">Transaction Graph</h4>
+                <h4 class="m-0">Top 5 Highest Transactions</h4>
             </div>
             <div class="card-body">
-                <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px"></MudChart>
-                <MudText Typo="Typo.h6">Selected portion of the chart: @Index</MudText>
+                <MudChart ChartType="ChartType.Bar" ChartSeries="@TopTransactionsChartSeries" XAxisLabels="@TopTransactionsXAxisLabels" Width="100%" Height="350px"></MudChart>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Debts Graph -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="m-0">Pending Debts</h4>
+            </div>
+            <div class="card-body">
+                <MudChart ChartType="ChartType.Bar" ChartSeries="@PendingDebtsChartSeries" XAxisLabels="@PendingDebtsXAxisLabels" Width="100%" Height="350px"></MudChart>
             </div>
         </div>
     </div>
