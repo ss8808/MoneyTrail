@@ -50,8 +50,8 @@
 </div>
 
 <!-- Transaction Summary -->
-<div class="row mb-4">
-    <div class="col-md-3">
+<div class="row mb-4" style="display: flex; flex-wrap: nowrap; gap: 15px; justify-content: space-between;">
+    <div class="col-md-3" style="flex: 1;">
         <div class="card text-center shadow-sm border-primary">
             <div class="card-body">
                 <h5 class="card-title text-primary"><i class="fas fa-wallet"></i> Transactions Count</h5>
@@ -60,7 +60,7 @@
         </div>
     </div>
 
-    <div class="col-md-3">
+    <div class="col-md-3" style="flex: 1;">
         <div class="card text-center shadow-sm border-primary">
             <div class="card-body">
                 <h5 class="card-title text-primary"><i class="fas fa-wallet"></i> Total Transactions</h5>
@@ -69,33 +69,34 @@
         </div>
     </div>
 
-    <div class="col-md-3">
+    <div class="col-md-3" style="flex: 1;">
         <div class="card text-center shadow-sm border-primary">
             <div class="card-body">
-                <h5 class="card-title text-primary"><i class="fas fa-arrow-up"></i> Highest Inflow</h5>
+                <h5 class="card-title text-primary"><i class="fas fa-wallet"></i> Highest Inflow</h5>
                 <h4 class="card-text text-success fw-bold">@($"{HighestInflow?.Amount} {AuthService.GetPreferredCurrency()}")</h4>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
+    <div class="col-md-3" style="flex: 1;">
         <div class="card text-center shadow-sm border-primary">
             <div class="card-body">
-                <h5 class="card-title text-primary"><i class="fas fa-arrow-down"></i> Highest Outflow</h5>
+                <h5 class="card-title text-primary"><i class="fas fa-wallet"></i> Highest Outflow</h5>
                 <h4 class="card-text text-success fw-bold">@($"{HighestOutflow?.Amount} {AuthService.GetPreferredCurrency()}")</h4>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
+    <div class="col-md-3" style="flex: 1;">
         <div class="card text-center shadow-sm border-primary">
             <div class="card-body">
-                <h5 class="card-title text-primary"><i class="fas fa-hand-holding-heart"></i> Highest Debt</h5>
+                <h5 class="card-title text-primary"><i class="fas fa-wallet"></i> Highest Debt</h5>
                 <h4 class="card-text text-success fw-bold">@($"{HighestDebt?.Amount} {AuthService.GetPreferredCurrency()}")</h4>
             </div>
         </div>
     </div>
 </div>
+
 
 
 <!-- Tables Row: Top Transactions and Pending Debts -->
