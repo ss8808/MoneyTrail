@@ -159,6 +159,7 @@ namespace MoneyTrail.Views.Pages
             Transactions = (await TransactionService.GetAllAsync()).ToList(); // Refresh the list
             UpdateBalance();
             CloseAddForm();
+            Snackbar.Add("Transaction added successfully.", Severity.Success);
         }
 
         private async Task OnEditTransaction()
@@ -212,14 +213,33 @@ namespace MoneyTrail.Views.Pages
             Transactions = (await TransactionService.GetAllAsync()).ToList(); // Refresh the list
             UpdateBalance();
             CloseEditForm();
+            Snackbar.Add("Transaction updated successfully.", Severity.Success);
         }
 
         private async Task DeleteTransaction(int id)
         {
-            await TransactionService.DeleteAsync(id);
-            Transactions = (await TransactionService.GetAllAsync()).ToList(); // Refresh the list
-            UpdateBalance();
+            var transaction = await TransactionService.GetByIdAsync(id);
+
+            if (transaction != null)
+            {
+                if (transaction.Type == TransactionType.Debit || transaction.Amount <= Balance
+                    || (transaction.Type == TransactionType.Debt && transaction.IsCleared)
+                )
+                {
+                    await TransactionService.DeleteAsync(id);
+                    Transactions = (await TransactionService.GetAllAsync()).ToList();
+                    UpdateBalance();
+                    Snackbar.Add("Transaction deleted successfully.", Severity.Success);
+                }
+                else
+                {
+                    Snackbar.Add("The transaction amount exceeds the current balance and cannot be deleted.", Severity.Error);
+
+                }
+            }
+   
         }
+
 
         private void UpdateBalance()
         {
